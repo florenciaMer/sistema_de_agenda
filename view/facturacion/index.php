@@ -1,9 +1,10 @@
 <?php 
 include_once('../../controllers/config.php');
 include_once('../layout/parte1.php');
-include_once('../../controllers/valores/listado_de_consultas.php');
+include_once('../../controllers/pacientes/listado_de_pacientes.php');
+include_once('../../controllers/facturacion/listado_de_facturaciones.php');
+include_once('../../controllers/facturacion/listado_de_citas.php')
 ?>
-
 </head>
 
 <!-- Content Wrapper. Contains page content -->
@@ -12,14 +13,14 @@ include_once('../../controllers/valores/listado_de_consultas.php');
     <div class="content">
         <div class="container">
             <div class="row">
-                <h1>Valores de las Consultas</h1>
+                <h1>Listado de Citas Por Cobrar</h1>
             </div>
             <div class="row">
-            <div class="card">
+            <div class="card col-md-10">
              <div class="card-body">
                 <div class="d-flex justify-content-between m-2">
-                    <h3>Cosultas registradas</h3>
-                    <a href="create.php" class="btn btn-primary">Crear Valor</a>
+                    <h3>Citas registradas por cobrar</h3>
+                    <a href="create.php" class="btn btn-primary">Facturar</a>
                 </div>
 
                 <table class="table border" id="example2">
@@ -28,52 +29,51 @@ include_once('../../controllers/valores/listado_de_consultas.php');
                             <th>Nro</th>
                             <th>Nombre</th>
                             <th>Apellido</th>
-                            <th>Valor</th>
-                            <th>Desde</th>
-                            <th>Hasta</th>
-                            <th>Acciones</th>
+                            <th>Fecha</th>
+                            <th>Hora</th>
+                          
                         </tr>
                     </thead>
                     <tbody>
-                        
+                        <!-- SE DEJA PENDIENTE EL CODIGO HASTA TENER REGISTRADAS LAS FACTURACIONES-->
                      <?php
-                     
-                        $contador_valores=0;
-                            foreach ($valores_datos as $valor) {
-                                $contador_valores = $contador_valores+1;
-                                $id_paciente = $valor['id_paciente_valor'];
-                                $desde = $valor['desde'];
-                                $hasta = $valor['hasta'];
-                                $fyh_creacion = $valor['fyh_creacion'];
-                                $precio = $valor['precio'];
-                                $fyh_creacion = $valor['fyh_creacion'];
-                                
-                                foreach ($datos_paciente as $paciente) {
+                        $total = 0;
+                        $contador_citas=0;
+                            foreach ($citas_datos as $cita) {
+                                $contador_citas = $contador_citas+1;
+                                $id_paciente = $cita['id_paciente'];
+                                $desde = $cita['fecha_cita'];
+                                $hora = $cita['hora_cita'];
+                                //$precio = $cita['precio'];
+                                //$total += $precio;
+                               // echo $total;
+                              
+                                foreach ($pacientes_datos as $paciente) {
                                   if ($id_paciente == $paciente['id_paciente']) {
                                       $nombre = $paciente['nombre'];
                                       $apellido = $paciente['apellido'];
-                                     
+                                     break;
                                   }
-                          
                               }  
                            ?>
                            
                         <tr>
 
-                            <td><?php echo $contador_valores?></td>
+                            <td><?php echo $contador_citas?></td>
                            
                             <td><?php echo $nombre?></td>
                             <td><?php echo $apellido?></td>
-                            <td>$<?php echo $precio?></td>
                             <td><?php echo date('d-m-Y', strtotime($desde));?></td>
-                            <td><?php echo date('d-m-Y', strtotime($hasta));?></td>
+                            <td><?php echo $hora;?></td>
+                           <!-- <td>$<?php echo $total;?></td> -->
                           
                 
-                            <td>
-                             <!--   <a href="show.php?id_usuario=<?php echo $id_paciente;?>" class="btn btn-info btn-sm"><i class="bi bi-eye"></i></a> -->
-                                <a href="update.php?id_valor=<?php echo $id_valor;?>" class="btn btn-success btn-sm"><i class="bi bi-pencil"></i></a>
-                                </td>
-                          <!-- <div id="respuesta-delete<?php echo $id_valor?>"></div>-->
+                           <!-- <td>
+                                <a href="show.php?id_usuario=<?php echo $id_paciente;?>" class="btn btn-info btn-sm"><i class="bi bi-eye"></i></a> 
+                                <a href="update.php?id_valor=<?php echo $id_valor;?>" class="btn btn-success btn-sm"><i class="bi bi-pencil"></i></a> 
+                                <button id="btn-delete<?php echo $id_valor;?>" class="btn btn-danger btn-sm"><i class="bi bi-trash"></i></button> 
+                            </td>
+                           <div id="respuesta-delete<?php echo $id_valor?>"></div>-->
       
 <script>
 $('#btn-delete<?php echo $id_valor;?>').click(function(){
@@ -125,24 +125,18 @@ Swal.fire({
     <!-- /.content -->
 </div>
 <!-- /.content-wrapper -->
-
-<!-- Control Sidebar -->
-<?= 
- include_once('../layout/parte2.php');
- include_once('../layout/mensajes.php');
-?>
 <script>
   $(function () {
     $("#example2").DataTable({
       "pageLength": 5,
     "language":{
       "emptyTable": "No hay información",
-      "info": "Mostrando_START_a _END_de_Total_valores",
-      "infoEmpty":"Mostrando 0 a 0 de 0 valores",
-      "infoFiltered":"(Filtrado de _MAX_ total valores)",
+      "info": "Mostrando_START_a _END_de_Total_resultados",
+      "infoEmpty":"Mostrando 0 a 0 de 0 resultados",
+      "infoFiltered":"(Filtrado de _MAX_ total resultados)",
       "infoPostFix": "",
       "thousands":",",
-      "lengthMenu": "Mostrar _MENU_valores",
+      "lengthMenu": "Mostrar _MENU_resultados",
       "loadingRecords": "Cargando...",
       "processing":"Procesando",
       "search": "Buscador",
@@ -185,3 +179,8 @@ Swal.fire({
     
   });
 </script>
+<!-- Control Sidebar -->
+<?= 
+ include_once('../layout/parte2.php');
+ include_once('../layout/mensajes.php');
+?>

@@ -88,8 +88,8 @@ include_once('../../controllers/config.php');
   });
   </script>
     <?php
-    //unset($_SESSION['mensaje']);
-    //unset($_SESSION['icono']);
+    unset($_SESSION['mensaje']);
+    unset($_SESSION['icono']);
   }
 ?>  
     <!-- /.login-card-body -->

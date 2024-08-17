@@ -66,7 +66,7 @@ include_once('../../controllers/config.php');
                                 <div class="col-md-12">
                                     <div class="form-group">
                                         <button type="submit" class="btn btn-primary">Registrar</button>
-                                        <a href="#" type="button" class="btn btn-secondary">Cancelar</a>
+                                        <a href="<?php echo APP_URL;?>" type="button" class="btn btn-secondary">Cancelar</a>
                                     </div>
                                 </div>
                             </div>
@@ -82,7 +82,29 @@ include_once('../../controllers/config.php');
 </div>
 <!-- /.content-wrapper -->
 
+<?php
+  session_start();
+  if (isset($_SESSION['mensaje']) && isset($_SESSION['icono'])) {
+    $mensaje = $_SESSION['mensaje'];
+    $icono = $_SESSION['icono'];
 
+    ?>
+  <script>
+    var mensaje = '<?php echo $mensaje;?>';
+    var icono = '<?php echo $icono;?>';
+    Swal.fire({
+    position: "top-end",
+    icon: icono,
+    title: mensaje,
+    showConfirmButton: false,
+    timer: 2000
+  });
+  </script>
+    <?php
+    unset($_SESSION['mensaje']);
+    unset($_SESSION['icono']);
+  }
+?>
  
 <!-- Control Sidebar -->
 <?php 

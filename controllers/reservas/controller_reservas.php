@@ -63,7 +63,7 @@ $cuenta = $sentencia->rowCount();
 
 if ($cuenta > 0) {
     session_start();
-    $_SESSION['mensaje'] = 'Ya existe una cita para ese día en ese horario';
+    $_SESSION['mensaje'] = 'Ya existe una cita para ese día';
     $_SESSION['icono'] = 'error';
     ?>
     <script>

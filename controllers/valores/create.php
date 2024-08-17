@@ -15,7 +15,7 @@ $cuenta=0;
  
  if ($cuenta>0) {
      session_start();
-     $_SESSION['mensaje'] = $id_paciente.'El paciente ya tiene valores asignados para ese período, debe editar la información';
+     $_SESSION['mensaje'] = 'El paciente ya tiene valores asignados para ese período, debe editar la información';
      $_SESSION['icono'] = 'error';
      ?>
      <script>
@@ -37,8 +37,8 @@ $cuenta=0;
      
      
      session_start();
-     $_SESSION['mensaje'] = 'El usuario se registro de la manera correcta';
+     $_SESSION['mensaje'] = 'El Valor se registro de la manera correcta';
      $_SESSION['icono'] = 'success';
-     header('Location:'.APP_URL.'/index.php');
+     header('Location:'.APP_URL.'/view/valores/index.php');
  }
  

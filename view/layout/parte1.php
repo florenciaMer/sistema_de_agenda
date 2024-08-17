@@ -192,7 +192,7 @@ $sesion_usuario = $query_sesion->fetchAll(PDO::FETCH_ASSOC);
   <!-- Main Sidebar Container -->
   <aside class="main-sidebar sidebar-dark-primary elevation-4">
     <!-- Brand Logo -->
-    <a href="index3.html" class="brand-link">
+    <a href="<?php echo APP_URL;?>" class="brand-link">
       <img src="<?php echo APP_URL;?>/public/img/calendario.png" alt="AdminLTE Logo" class="brand-image img-circle elevation-3" style="opacity: .8">
       <a href="<?php echo APP_URL;?>/index.php" class="brand-text font-weight-light"><h3>SIS | Agenda</h3></a>
     </a>
@@ -205,7 +205,7 @@ $sesion_usuario = $query_sesion->fetchAll(PDO::FETCH_ASSOC);
           <img src="<?php echo APP_URL;?>/public/img/usuario.png" class="elevation-2" alt="usuario">
         </div>
         <div class="info">
-          <a href="#" class="d-block"><?php echo $_SESSION['sesion_email'];?></a>
+          <a href="<?php echo APP_URL;?>" class="d-block"><?php echo $_SESSION['sesion_email'];?></a>
         </div>
       </div>
 
@@ -255,7 +255,7 @@ $sesion_usuario = $query_sesion->fetchAll(PDO::FETCH_ASSOC);
             <a href="<?php echo APP_URL;?>/view/valores/index.php" class="nav-link active">
               <i class="nav-icon bi bi-cash-coin"></i>
               <p>
-                Valores Consultas
+                Valores Citas
                 <i class="right fas fa-angle-left"></i>
               </p>
             </a>
@@ -264,6 +264,26 @@ $sesion_usuario = $query_sesion->fetchAll(PDO::FETCH_ASSOC);
                 <a href="<?php echo APP_URL;?>/view/valores/index.php" class="nav-link">
                 <i class="nav-icon bi bi-cash-coin"></i>
                   <p>Listado de Valores</p>
+                </a>
+              </li>
+             
+            </ul>
+          </li>
+
+          <li class="nav-item">
+            <a href="<?php echo APP_URL;?>/view/facturacion/index.php" class="nav-link active">
+              <i class="nav-icon bi bi-cash"></i>
+             
+              <p>
+                Facturación
+                <i class="right fas fa-angle-left"></i>
+              </p>
+            </a>
+            <ul class="nav nav-treeview">
+              <li class="nav-item">
+                <a href="<?php echo APP_URL;?>/view/facturacion/index.php" class="nav-link">
+                <i class="nav-icon bi bi-cash"></i>
+                  <p>Citas Realizadas</p>
                 </a>
               </li>
              

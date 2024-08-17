@@ -2,7 +2,11 @@
 
 //include_once('../config.php');
 
-$sql = "SELECT * FROM tb_valores WHERE estado = '1'";
+$sql = "SELECT tb_valores.*, tb_pacientes.nombre, tb_pacientes.apellido
+FROM tb_valores
+INNER JOIN tb_pacientes ON tb_valores.id_paciente_valor = tb_pacientes.id_paciente
+WHERE tb_valores.estado = '1'
+ORDER BY tb_pacientes.nombre, tb_valores.desde";
 $query = $pdo->prepare($sql);
 $query->execute();
 
