@@ -14,7 +14,7 @@
       v.1.0    
     </div>
     <!-- Default to the left -->
-    <strong>Copyright &copy; <?php echo $anio;?> <a href="https://adminlte.io">Florencia Merzario.io</a>.</strong> All rights reserved.
+    <strong>Copyright &copy; <?php echo $anio;?> <a href="https://flor.io">Florencia Merzario.io</a>.</strong> All rights reserved.
   </footer>
 </div>
 <!-- ./wrapper -->
@@ -40,6 +40,7 @@ https://cdn.jsdelivr.net/npm/sweetalert2@11.12.4/dist/sweetalert2.all.min.js
 
 
 <!-- DATETABLES-->
+ 
 <script src="<?php echo APP_URL;?>/public/adminLTE/plugins/datatables/jquery.dataTables.min.js"></script>
 <script src="<?php echo APP_URL;?>/public/adminLTE/plugins/datatables-bs4/js/dataTables.bootstrap4.min.js"></script>
 <script src="<?php echo APP_URL;?>/public/adminLTE/plugins/datatables-responsive/js/dataTables.responsive.min.js"></script>

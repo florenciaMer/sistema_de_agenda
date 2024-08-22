@@ -63,15 +63,114 @@ $sesion_usuario = $query_sesion->fetchAll(PDO::FETCH_ASSOC);
   
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-treeview/1.2.0/bootstrap-treeview.min.css" integrity="sha512-A81ejcgve91dAWmCGseS60zjrAdohm7PTcAjjiDWtw3Tcj91PNMa1gJ/ImrhG+DbT5V+JQ5r26KT5+kgdVTb5w==" crossorigin="anonymous" referrerpolicy="no-referrer" />
  <!-- data tables-->
-<link rel="stylesheet" href="<?php echo APP_URL;?>/public/adminLTE/plugins/datatables-bs4/css/dataTables.bootstrap4.min.css">
-<link rel="stylesheet" href="<?php echo APP_URL;?>/public/adminLTE/plugins/datatables-responsive/css/responsive.bootstrap4.min.css">
-<link rel="stylesheet" href="<?php echo APP_URL;?>/public/adminLTE/plugins/datatables-buttons/css/buttons.bootstrap4.min.css">
+<!-- jQuery -->
+
+<!-- DataTables -->
+<!-- DataTables JS -->
+<!-- Bootstrap CSS -->
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+<!-- DataTables CSS -->
+<link href="https://cdn.datatables.net/1.13.4/css/jquery.dataTables.min.css" rel="stylesheet">
+<link href="https://cdn.datatables.net/1.13.4/css/dataTables.bootstrap5.min.css" rel="stylesheet">
+
+<!-- Buttons Extension for DataTables CSS -->
+
+
+<link href="https://cdn.datatables.net/buttons/2.3.6/css/buttons.bootstrap5.min.css" rel="stylesheet">
+
+
+<!-- Font Awesome (Opcional) -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+
+
+
+<!-- jQuery -->
+
+
+<script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+
+
+
+
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+
+
+<!-
+<!-- DataTables JS -->
+<script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.4/js/dataTables.bootstrap5.min.js"></script>
+
+
+
+
+<!-- Buttons Extension for DataTables JS -->
+
+
+<script src="https://cdn.datatables.net/buttons/2.3.6/js/dataTables.buttons.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.3.6/js/buttons.flash.min.js"></script>
+
+
+<script src="https://cdn.datatables.net/buttons/2.3.6/js/buttons.html5.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.3.6/js/buttons.print.min.js"></script>
+
+<script src="https://cdn.datatables.net/buttons/2.3.6/js/buttons.colVis.min.js"></script>
+
+<!-- Optional: JSZip and pdfmake for file export -->
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.0/jszip.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/pdfmake.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.js"></script>
+
+
+<!-- DataTables Buttons CSS -->
+
+
+
+<!-- Otros scripts de DataTables... -->
+
+
+    <!-- DataTables JS -->
+   
+
 <!-- data tables-->
 
 
 </head>
 
 <body class="hold-transition sidebar-mini">
+   
+<style>
+      .dt-button {
+            border-bottom: 1px solid #6c757d; /* Color y grosor de la línea divisoria */
+        }
+
+        .dt-button:not(:last-child) {
+        margin-bottom: 4px; /* Espacio entre los botones y la línea divisoria */
+        }
+        .dt-button {
+            background-color:#6c757d; /* Color de fondo */
+            color: #fff; /* Color del texto */
+            border: none; /* Sin borde */
+            padding: 8px 16px; /* Espaciado interno */
+            margin-right: 8px; /* Espacio entre botones */
+            border-radius: 4px; /* Bordes redondeados */
+            font-size: 14px; /* Tamaño de fuente */
+            cursor: pointer; /* Cambia el cursor al pasar por encima */
+        }
+
+        .dt-button:hover {
+            background-color: #0056b3; /* Color de fondo al pasar el ratón */
+            color: #fff; /* Color del texto al pasar el ratón */
+        }
+
+        .dt-button:active {
+            background-color: #004085; /* Color de fondo al hacer clic */
+            color: #fff; /* Color del texto al hacer clic */
+        }
+    </style>
 <div class="wrapper">
 
   <!-- Navbar -->
@@ -235,7 +334,7 @@ $sesion_usuario = $query_sesion->fetchAll(PDO::FETCH_ASSOC);
           </li>
           <li class="nav-item">
             <a href="<?php echo APP_URL;?>/view/pacientes/index.php" class="nav-link active">
-              <i class="nav-icon bi-emoji-astonished"></i>
+              <i class="nav-icon bi-file-earmark-person"></i>
               <p>
                 Pacientes
                 <i class="right fas fa-angle-left"></i>
@@ -244,7 +343,7 @@ $sesion_usuario = $query_sesion->fetchAll(PDO::FETCH_ASSOC);
             <ul class="nav nav-treeview">
               <li class="nav-item">
                 <a href="<?php echo APP_URL;?>/view/pacientes/index.php" class="nav-link">
-                <i class="nav-icon bi-emoji-astonished"></i>
+                <i class="nav-icon bi-file-earmark-person"></i>
                   <p>Listado de Pacientes</p>
                 </a>
               </li>
@@ -272,6 +371,33 @@ $sesion_usuario = $query_sesion->fetchAll(PDO::FETCH_ASSOC);
 
           <li class="nav-item">
             <a href="<?php echo APP_URL;?>/view/facturacion/index.php" class="nav-link active">
+              <i class="nav-icon bi bi-calendar2-check"></i>
+             
+              <p>
+                Citas Registradas
+                <i class="right fas fa-angle-left"></i>
+              </p>
+            </a>
+            <ul class="nav nav-treeview">
+              <li class="nav-item">
+                <a href="<?php echo APP_URL;?>/view/facturacion/index.php" class="nav-link">
+                <i class="nav-icon bi bi-calendar2-check"></i>
+                  <p>Todas las Citas</p>
+                </a>
+              </li>
+              <li class="nav-item">
+                <a href="<?php echo APP_URL;?>/view/facturacion/facturacion_por_fecha.php" class="nav-link">
+                <i class="nav-icon bi bi-calendar2-check"></i>
+                  <p>Citas a una fecha</p>
+                </a>
+              </li>
+             
+            </ul>
+          </li>
+
+          <!-- facturacion -->
+          <li class="nav-item">
+            <a href="<?php echo APP_URL;?>/view/facturacion/index.php" class="nav-link active">
               <i class="nav-icon bi bi-cash"></i>
              
               <p>
@@ -283,12 +409,20 @@ $sesion_usuario = $query_sesion->fetchAll(PDO::FETCH_ASSOC);
               <li class="nav-item">
                 <a href="<?php echo APP_URL;?>/view/facturacion/index.php" class="nav-link">
                 <i class="nav-icon bi bi-cash"></i>
-                  <p>Citas Realizadas</p>
+                  <p>Facturación por período</p>
                 </a>
               </li>
+              <li class="nav-item">
+                <a href="<?php echo APP_URL;?>/view/facturacion/index.php" class="nav-link">
+                <i class="nav-icon bi bi-cash"></i>
+                  <p>Facturación por paciente</p>
+                </a>
+              </li>
+          
              
             </ul>
           </li>
+
           <li class="nav-item" style="background-color:red; color:white; border-radius:6px">
             <a href="<?php echo APP_URL;?>/controllers/login/logout.php" class="nav-link">
               <i class="nav-icon bi bi-door-open"></i>

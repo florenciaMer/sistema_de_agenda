@@ -15,7 +15,8 @@ $cuenta=0;
  AND fecha_cita >= :desde
  AND fecha_cita <= :hasta
  AND pagado = '0'
- AND estado = '1'");
+ AND estado = '1'
+ ");
 
 $sentencia->bindParam(':desde', $desde);
 $sentencia->bindParam(':hasta', $hasta);
@@ -35,6 +36,7 @@ foreach ($_SESSION['citas_a_facturar_datos'] as $citas_a_facturar) {
     $_SESSION['hora_cita'] = $citas_a_facturar['hora_cita'];
     $_SESSION['estado'] = $citas_a_facturar['estado'];
     $_SESSION['pagado'] = $citas_a_facturar['pagado'];
+   // $_SESSION['realizada'] = $citas_a_facturar['realizada'];
     $_SESSION['title'] = $citas_a_facturar['title'];
     $_SESSION['fyh_creacion'] = $citas_a_facturar['fyh_creacion'];
     $_SESSION['desde'] = $desde;

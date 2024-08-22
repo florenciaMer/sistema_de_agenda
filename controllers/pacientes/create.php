@@ -6,21 +6,26 @@ $direccion = $_POST['direccion'];
 $telefono = $_POST['telefono'];
 $celular = $_POST['celular'];
 $email = $_POST['email'];
-$id_paciente = $_POST['id_paciente'];
+//$id_paciente = $_POST['id_paciente'];
 $fyh_creacion = $fechaHora;
 $estado = 1;
 
 
  
- /*$sentencia= $pdo->prepare("SELECT * FROM  tb_pacientes WHERE email = '$email'");
+$sentencia = $pdo->prepare("SELECT * FROM tb_pacientes WHERE 
+email =:email OR nombre =:nombre AND apellido =:apellido");
+
+$sentencia->bindParam('nombre', $nombre);
+$sentencia->bindParam('apellido', $apellido);
+$sentencia->bindParam('email', $email);
+
  $sentencia->execute();
  $cuenta = $sentencia->rowCount();
  
  
- 
  if ($cuenta>0) {
      session_start();
-     $_SESSION['mensaje'] = 'El usuario ya existe en la base de datos';
+     $_SESSION['mensaje'] = 'Ya existe un usuario con ese nombre y apellido o email en la base de datos';
      $_SESSION['icono'] = 'error';
      ?>
      <script>
@@ -29,7 +34,7 @@ $estado = 1;
      
  <?php 
  
- }else{*/
+ }else{
  
      $sentencia2= $pdo->prepare("INSERT INTO `tb_pacientes`( `nombre`,`apellido`,`direccion`,`telefono`,`celular`,`email`, `fyh_creacion`,`estado`) 
      VALUES ('$nombre', '$apellido','$direccion', '$telefono', '$celular','$email','$fechaHora', '$estado')");
@@ -50,4 +55,4 @@ $estado = 1;
      $_SESSION['icono'] = 'success';
      header('Location:'.APP_URL.'/view/pacientes/index.php');
  //}
- 
+ }

@@ -3,23 +3,14 @@ include_once('../config.php');
 
 $id_paciente = $_POST['id_paciente'];
 $fecha_cita = $_POST['fecha_cita'];
-
 $hora_cita = date('H-i-s');
 $hora_cita = $_POST['hora_cita'];
-
-
 $start = $fecha_cita . ' ' . $hora_cita;
-
 $end_time = $hora_cita ;
-
 $horaInicial=$hora_cita;
-
 $minutoAnadir=40;
- 
 $segundos_horaInicial=strtotime($horaInicial)+2400;
- 
 $horaFinal=date('H:i:s', $segundos_horaInicial);
-
 $end_time=date('H:i:s',strtotime($horaFinal));
 
 

@@ -30,7 +30,7 @@ include_once('../layout/parte1.php');
                                                     foreach ($pacientes_datos as $paciente) {
                                                         ?>
                                                         <option value="<?php echo $paciente['id_paciente'];?>">
-                                                        <?php echo $paciente['nombre'];?>
+                                                        <?php echo $paciente['nombre'] .'-'. $paciente['apellido']?>
                                                         </option>
                                                     <?php
                                                         }
@@ -100,5 +100,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 });
+
+
 </script>
     

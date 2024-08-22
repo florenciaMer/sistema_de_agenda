@@ -13,17 +13,18 @@ include_once('../../controllers/facturacion/listado_de_citas.php')
     <div class="content">
         <div class="container">
             <div class="row">
-                <h1>Listado de Citas Por Cobrar</h1>
+                <h1>Listado de Citas</h1>
             </div>
             <div class="row">
             <div class="card col-md-10">
              <div class="card-body">
                 <div class="d-flex justify-content-between m-2">
-                    <h3>Citas registradas por cobrar</h3>
-                    <a href="create.php" class="btn btn-primary">Facturar</a>
+                    <h3>Citas registradas </h3>
+                    <a href="create.php" class="btn btn-primary">Facturar por paciente</a>
                 </div>
-
-                <table class="table border" id="example2">
+              
+                <table id="example2" class="table table-striped">
+              
                     <thead>
                         <tr>
                             <th>Nro</th>
@@ -31,6 +32,8 @@ include_once('../../controllers/facturacion/listado_de_citas.php')
                             <th>Apellido</th>
                             <th>Fecha</th>
                             <th>Hora</th>
+                            <th>Estado</th>
+                            <th>Pago - Acción</th>
                           
                         </tr>
                     </thead>
@@ -44,6 +47,7 @@ include_once('../../controllers/facturacion/listado_de_citas.php')
                                 $id_paciente = $cita['id_paciente'];
                                 $desde = $cita['fecha_cita'];
                                 $hora = $cita['hora_cita'];
+                                $pagado = $cita['pagado'];
                                 //$precio = $cita['precio'];
                                 //$total += $precio;
                                // echo $total;
@@ -65,8 +69,36 @@ include_once('../../controllers/facturacion/listado_de_citas.php')
                             <td><?php echo $apellido?></td>
                             <td><?php echo date('d-m-Y', strtotime($desde));?></td>
                             <td><?php echo $hora;?></td>
+                            
                            <!-- <td>$<?php echo $total;?></td> -->
-                          
+                            <?php if ($cita['realizada'] == '1') {
+                              ?>
+                              <td>Realizada</td>
+                           <?php }else{?>
+
+                             <td>Sin realizar</td>
+                           <?php } ?>
+                           
+                           <!-- pago -->
+                           <?php if ($cita['pagado'] == '1') {
+                              ?>
+                              <td>Paga</td>
+                           <?php }else{?>
+
+                             <td>
+                              Sin Pagar 
+                              <button class="btn btn-primary btn-sm confirmar-factura" 
+                                  id="confirmar-factura<?php echo $id_paciente;?>" 
+                                  data-id="<?php echo $id_paciente; ?>"
+                                  data-desde="<?php echo urlencode($desde); ?>"
+                                  data-hora="<?php echo date('H:i', strtotime($hora)); ?>">
+
+                            Facturar
+                            <i class="bi bi-pencil"></i>
+                          </button>
+                            </td>
+          </td>
+                           <?php } ?>
                 
                            <!-- <td>
                                 <a href="show.php?id_usuario=<?php echo $id_paciente;?>" class="btn btn-info btn-sm"><i class="bi bi-eye"></i></a> 
@@ -75,41 +107,9 @@ include_once('../../controllers/facturacion/listado_de_citas.php')
                             </td>
                            <div id="respuesta-delete<?php echo $id_valor?>"></div>-->
       
-<script>
-$('#btn-delete<?php echo $id_valor;?>').click(function(){
 
-let id_valor =  '<?php echo $id_valor?>';
-
-Swal.fire({
-  title: '¿Está seguro de eliminar la los valores de <?php echo $nombre .' - '. $apellido?>?',
-  showDenyButton: true,
-  showCancelButton: true,
-  confirmButtonText: 'Yes',
-  denyButtonText: 'No',
-  customClass: {
-    actions: 'my-actions',
-    cancelButton: 'order-1 right-gap',
-    confirmButton: 'order-2',
-    denyButton: 'order-3',
-  },
-}).then((result) => {
-  if (result.isConfirmed) {
-    
-    let url = "<?php echo APP_URL;?>/controllers/valores/delete.php";
-        $.get(url, {id_valor: id_valor}, function(datos){
-         $('#respuesta-delete<?php echo $id_valor?>').html(datos);
-        });
-   
-  } else if (result.isDenied) {
-    Swal.fire('Los cambios no se guardaron', '', 'info')
-  }
-})
-  
-})
-
-</script>
                         <?php  }?>
-                            
+                           <div id="respuesta-facturar" ></div>
 
                           
                      
@@ -126,17 +126,26 @@ Swal.fire({
 </div>
 <!-- /.content-wrapper -->
 <script>
-  $(function () {
+  $(document).ready(function() {
+    $('#example').DataTable({
+        dom: 'Bfrtip',
+        buttons: [
+            'colvis'
+        ]
+    });
+})
+  
+$(function () {
     $("#example2").DataTable({
       "pageLength": 5,
     "language":{
       "emptyTable": "No hay información",
-      "info": "Mostrando_START_a _END_de_Total_resultados",
-      "infoEmpty":"Mostrando 0 a 0 de 0 resultados",
-      "infoFiltered":"(Filtrado de _MAX_ total resultados)",
+      "info": "Mostrando_START_a _END_de_Total_Pacientes",
+      "infoEmpty":"Mostrando 0 a 0 de 0 Pacientes",
+      "infoFiltered":"(Filtrado de _MAX_ total Pacientes)",
       "infoPostFix": "",
       "thousands":",",
-      "lengthMenu": "Mostrar _MENU_resultados",
+      "lengthMenu": "Mostrar _MENU_Pacientes",
       "loadingRecords": "Cargando...",
       "processing":"Procesando",
       "search": "Buscador",
@@ -172,13 +181,39 @@ Swal.fire({
       {
         extend: 'colvis',
         text: 'Visor de columnas',
-        collectionLayout: 'fixed three-column'
+        collectionLayout: 'fixed three-column',
+        
       }
     ],
     }).buttons().container().appendTo('#example2_wrapper .col-md-6:eq(0)');
     
   });
 </script>
+
+<script>
+  $(document).ready(function() {
+    // Usa una clase en lugar de un ID para manejar el clic en los botones
+    $(document).on('click', '.btn.confirmar-factura', function() {
+        var id_paciente = $(this).data('id');
+        //desde es la fecha de la cita
+        var desde = $(this).data('desde');
+        var hora = $(this).data('hora');
+
+        // Imprime los datos en la consola para verificar
+        console.log('ID Paciente:', id_paciente);
+        console.log('Desde:', desde);
+        console.log('Hora:', hora);
+
+    
+    let url = "<?php echo APP_URL;?>/controllers/facturacion/pagar_una_cita.php";
+        $.get(url, {id_paciente: id_paciente, desde:desde, hora:hora}, function(datos){
+         $('#respuesta-facturar').html(datos);
+        });
+  })
+ 
+  })
+</script>
+
 <!-- Control Sidebar -->
 <?= 
  include_once('../layout/parte2.php');

@@ -1,22 +1,24 @@
 <?php
+// Incluir archivos necesarios
 include_once('../../controllers/config.php');
 include_once('../layout/parte1.php');
 include_once('../../controllers/pacientes/listado_de_pacientes.php');
 include_once('../../controllers/facturacion/listado_de_facturaciones.php');
 include_once('../../controllers/facturacion/listado_de_citas.php');
-// include_once('../../controllers/facturacion/buscar_citas_facturar.php');
 
-// Debugging session data
+$noHayLista=0;
+// Verificar si la sesión tiene los datos de citas a facturar
 if (isset($_SESSION['citas_a_facturar_datos']) && !empty($_SESSION['citas_a_facturar_datos'])) {
-    $citas_a_facturar_datos = $_SESSION['citas_a_facturar_datos'];
+    
+  $citas_a_facturar_datos = $_SESSION['citas_a_facturar_datos'];
     $total = 0;
     $contador_citas = 0;
     $id_paciente = $citas_a_facturar_datos[0]['id_paciente'];
 
+    // Obtener los datos del paciente
     $sql_paciente = "SELECT nombre, apellido FROM tb_pacientes
-                      WHERE id_paciente = :id_paciente
-                      AND estado = '1'";
-
+                     WHERE id_paciente = :id_paciente
+                     AND estado = '1'";
     $sentencia3 = $pdo->prepare($sql_paciente);
     $sentencia3->bindParam(':id_paciente', $id_paciente);
     $sentencia3->execute();
@@ -37,172 +39,159 @@ if (isset($_SESSION['citas_a_facturar_datos']) && !empty($_SESSION['citas_a_fact
     <th>Fecha</th>
     <th>Hora</th>
     <th>Importe</th>
+    <th>Pago</th>
     <th>Estado</th>
+   
     </tr>
     </thead>
     <tbody>';
 
-foreach ($citas_a_facturar_datos as $citas_a_facturar) {
-    $contador_citas++;
-    $id_paciente = $citas_a_facturar['id_paciente'];
-    $fecha_cita = $citas_a_facturar['fecha_cita'];
-    $hora_cita = $citas_a_facturar['hora_cita'];
-    $pagado = $citas_a_facturar['pagado'];
+    foreach ($citas_a_facturar_datos as $citas_a_facturar) {
+        $contador_citas++;
+        $id_paciente = $citas_a_facturar['id_paciente'];
+        $fecha_cita = $citas_a_facturar['fecha_cita'];
+        $hora_cita = $citas_a_facturar['hora_cita'];
+        $pagado = $citas_a_facturar['pagado'];
+        $realizada = $citas_a_facturar['realizada'];
+        $pagado = $citas_a_facturar['pagado'];
 
-    // Obtenemos el precio para cada cita
-    $sql_check = "SELECT DISTINCT precio FROM tb_valores
-                  WHERE id_paciente_valor = :id_paciente
-                  AND :fecha_cita BETWEEN desde AND hasta
-                  AND estado = '1'";
+        // Obtener el precio para cada cita
+        $sql_check = "SELECT DISTINCT precio FROM tb_valores
+                      WHERE id_paciente_valor = :id_paciente
+                      AND :fecha_cita BETWEEN desde AND hasta
+                      AND estado = '1'";
+        $sentencia2 = $pdo->prepare($sql_check);
+        $sentencia2->bindParam(':fecha_cita', $fecha_cita);
+        $sentencia2->bindParam(':id_paciente', $id_paciente);
+        $sentencia2->execute();
+        $importe_datos = $sentencia2->fetch(PDO::FETCH_ASSOC);
 
-    $sentencia2 = $pdo->prepare($sql_check);
-    $sentencia2->bindParam(':fecha_cita', $fecha_cita);
-    $sentencia2->bindParam(':id_paciente', $id_paciente);
-    $sentencia2->execute();
-    $importe_datos = $sentencia2->fetch(PDO::FETCH_ASSOC);
+        echo '<tr>
+            <td>' . $contador_citas . '</td>
+            <td>' . $nombre . '</td>
+            <td>' . $apellido . '</td>
+            <td>' . date('d-m-Y', strtotime($fecha_cita)) . '</td>
+            <td>' . $hora_cita . '</td>
+            <td>';
 
-    ?>
-    <tr>
-        <td><?php echo $contador_citas; ?></td>
-        <td><?php echo $nombre; ?></td>
-        <td><?php echo $apellido; ?></td>
-        <td><?php echo date('d-m-Y', strtotime($fecha_cita)); ?></td>
-        <td><?php echo $hora_cita; ?></td>
-        <td>
-            <?php 
-            if ($importe_datos && isset($importe_datos['precio'])) {
-                $importe_unitario = $importe_datos['precio'];
-                $total += $importe_unitario;
-                echo '$' . number_format($importe_unitario, 2);
-            } else {
-                echo "No hay lista asociada";
-                ?>
-                <a href="../valores/create.php" class="btn btn-primary" id="facturar">Crear Lista</a>
-                <?php
-            }
-            ?>
-        </td>
-        <?php
-          if ($pagado == '1') {?>
-            <td>Pagado</td>
-          <?php }else if($pagado == '0') {?>
-            <td>Impago</td>
-        <?php  } ?>
-       
-      
-    </tr>
-    <div id="pagar"></div>
-    <?php
-}
+        if ($importe_datos && isset($importe_datos['precio'])) {
+            $importe_unitario = $importe_datos['precio'];
+            $total += $importe_unitario;
+            echo '$' . number_format($importe_unitario, 2);
+        } else {
+            echo "No hay lista asociada";
+            $noHayLista = '1';
+            echo '<a href="../valores/create.php" class="btn btn-primary" id="facturar">Crear Lista</a>';
+        }
 
-echo '</tbody></table>';
-echo '<div class="rounded" style="text-align: right; background-color:darkgray; padding:5px;margin: 10px;">Total: $' . number_format($total, 2) . '</div>';
-echo  '<div style="text-align: right; margin-top: 10px;" >
-<div id="btn-facturar" class="btn btn-success">Confirmar Pago</div>
-</div>';
+        echo '</td>';
+        echo ($pagado == '1') ? '<td>Pagado</td>' : '<td>Impago</td>';
+        echo ($realizada == '1') ? '<td class="bg-success">Realizada</td>' : '<td class="bg-warning">Sin realizar</td>';
+        echo '</tr>';
+    }
 
-echo '</div></div></div></div></div>';
-
-     ?>
+    echo '</tbody></table>';
+    echo '<div class="rounded" style="text-align: right; background-color:darkgray; padding:5px;margin: 10px;">Total: $' . number_format($total, 2) . '</div>';
+    echo '<div style="text-align: right; margin-top: 10px;">';
+   if ($realizada == '0' || $noHayLista == '1') {
+    echo '<div id="btn-facturar" class="btn btn-success disabled">Confirmar Pago</div>
+          </div>';
+   }else{
+    echo '<div id="btn-facturar" class="btn btn-success">Confirmar Pago</div>
+          </div>';
+   }
     
-<?php } else{
-  echo "Sin datos para mostrar en la vista";
-}
-'</div></div>'?>
-<script>
 
+    echo '</div></div></div></div></div>';
+
+} else {
+    echo "Sin datos para mostrar en la vista";
+}
+
+?>
+
+<script>
+// Obtener y preparar los datos para el envío
 $('#btn-facturar').click(function(){
     let citas_a_facturar_datos = <?php echo json_encode($citas_a_facturar_datos); ?>;
     let id_paciente = '<?php echo $id_paciente ?>';
     
-    // Crea el objeto de datos a enviar
     let data = {         
         id_paciente: id_paciente,
         citas: citas_a_facturar_datos
     };
 
-    // Enviar los datos al servidor usando POST
     $.ajax({
         url: "<?php echo APP_URL; ?>/controllers/facturacion/pagar.php",
         type: 'POST',
         contentType: 'application/json',
         data: JSON.stringify(data),
         success: function(response) {
-            // Maneja la respuesta del servidor aquí
-            console.log('Respuesta del servidor:', response); // Para depuración
-            $('#pagar<?php echo $id_paciente ?>').html(response);
+            console.log('Respuesta del servidor:', response); // Para verificar que llega la respuesta correcta
+            if (response.status === 'success') {
+                console.log('Redirigiendo a:', response.redirect_url); // Para confirmar que se va a redirigir
+                window.location.href = response.redirect_url;
+            } else {
+                console.error('Error en la operación:', response.message);
+                alert('Error: ' + response.message);
+            }
         },
         error: function(xhr, status, error) {
-            // Maneja errores aquí
-            console.error('Error:', error);
+            console.error('Error en la llamada AJAX:', error);
+            alert('Ocurrió un error al procesar la solicitud.');
         }
     });
 });
+
 </script>
 
-        
- </script>
-  
 <script>
-  $(function () {
+   $(document).ready(function() {
     $("#example2").DataTable({
-      "pageLength": 5,
-    "language":{
-      "emptyTable": "No hay información",
-      "info": "Mostrando_START_a _END_de_Total_resultados",
-      "infoEmpty":"Mostrando 0 a 0 de 0 resultados",
-      "infoFiltered":"(Filtrado de _MAX_ total resultados)",
-      "infoPostFix": "",
-      "thousands":",",
-      "lengthMenu": "Mostrar _MENU_resultados",
-      "loadingRecords": "Cargando...",
-      "processing":"Procesando",
-      "search": "Buscador",
-      "zeroRecords": "Sin resultados encontrados",
-      "paginate":{
-        "first":"Primero",
-        "last": "Ultimo",
-        "next": "Siguiente",
-        "previous": "Anterior"
-        }
-      },
-      "responsive": true, "lengthChange": true, "autoWidth": false,
-      buttons:[{
-      extend:'collection',
-      text: 'Reportes',
-      orientation: 'landscape',
-      buttons:[{
-        text: 'Copiar',
-        extend: 'copy',
-      },{
-        extend: 'pdf',
-      },
-      {
-        extend: 'csv',
-      },
-      {
-        extend: 'excel',
-      },{
-        text: 'Imprimir',
-        extend: 'print',
-      }]
-    },
-      {
-        extend: 'colvis',
-        text: 'Visor de columnas',
-        collectionLayout: 'fixed three-column'
-      }
-    ],
+        "pageLength": 5,
+        "language": {
+            "emptyTable": "No hay información",
+            "info": "Mostrando _START_ a _END_ de _TOTAL_ Pacientes",
+            "infoEmpty": "Mostrando 0 a 0 de 0 Pacientes",
+            "infoFiltered": "(Filtrado de _MAX_ total Pacientes)",
+            "lengthMenu": "Mostrar _MENU_ Pacientes",
+            "loadingRecords": "Cargando...",
+            "processing": "Procesando",
+            "search": "Buscador",
+            "zeroRecords": "Sin resultados encontrados",
+            "paginate": {
+                "first": "Primero",
+                "last": "Último",
+                "next": "Siguiente",
+                "previous": "Anterior"
+            }
+        },
+        "responsive": true, 
+        "lengthChange": true, 
+        "autoWidth": false,
+        "buttons": [{
+            extend: 'collection',
+            text: 'Reportes',
+            orientation: 'landscape',
+            buttons: [
+                { text: 'Copiar', extend: 'copy' },
+                { extend: 'pdf' },
+                { extend: 'csv' },
+                { extend: 'excel' },
+                { text: 'Imprimir', extend: 'print' }
+            ]
+        }, {
+            extend: 'colvis',
+            text: 'Visor de columnas',
+            collectionLayout: 'fixed three-column'
+        }]
     }).buttons().container().appendTo('#example2_wrapper .col-md-6:eq(0)');
-    
-  });
+});
+
 </script>
-<!-- Control Sidebar -->
-<?= 
- include_once('../layout/parte2.php');
- include_once('../layout/mensajes.php');
+
+<?php
+// Incluir pie de página y otros scripts necesarios
+include_once('../layout/parte2.php');
+include_once('../layout/mensajes.php');
 ?>
-
-
-  
-

@@ -46,7 +46,7 @@ include_once('../../controllers/valores/listado_de_consultas.php');
                                 $hasta = $valor['hasta'];
                                 $fyh_creacion = $valor['fyh_creacion'];
                                 $precio = $valor['precio'];
-                                $fyh_creacion = $valor['fyh_creacion'];
+                                $id_valor = $valor['id_valor'];
                                 
                                 foreach ($datos_paciente as $paciente) {
                                   if ($id_paciente == $paciente['id_paciente']) {
@@ -72,16 +72,17 @@ include_once('../../controllers/valores/listado_de_consultas.php');
                             <td>
                              <!--   <a href="show.php?id_usuario=<?php echo $id_paciente;?>" class="btn btn-info btn-sm"><i class="bi bi-eye"></i></a> -->
                                 <a href="update.php?id_valor=<?php echo $id_valor;?>" class="btn btn-success btn-sm"><i class="bi bi-pencil"></i></a>
-                                </td>
-                          <!-- <div id="respuesta-delete<?php echo $id_valor?>"></div>-->
-      
+                                
+                           <span id="btn-delete<?php echo $id_valor?>" class="btn btn-danger btn-sm"><i class="bi bi-trash"></i></span>
+                            </td>
+                            <div id="respuesta-delete<?php echo $id_valor?>"></div>
 <script>
 $('#btn-delete<?php echo $id_valor;?>').click(function(){
 
 let id_valor =  '<?php echo $id_valor?>';
 
 Swal.fire({
-  title: '¿Está seguro de eliminar la los valores de <?php echo $nombre .' - '. $apellido?>?',
+  title: '¿Está seguro de eliminar los valores de <?php echo $nombre .' - '. $apellido?>?',
   showDenyButton: true,
   showCancelButton: true,
   confirmButtonText: 'Yes',
@@ -94,9 +95,11 @@ Swal.fire({
   },
 }).then((result) => {
   if (result.isConfirmed) {
-    
+    let desde = "<?php echo $desde;?>";
+    let hasta = "<?php echo $hasta;?>";
+    let id_paciente = "<?php echo $id_paciente;?>";
     let url = "<?php echo APP_URL;?>/controllers/valores/delete.php";
-        $.get(url, {id_valor: id_valor}, function(datos){
+        $.get(url, {id_paciente: id_paciente, id_valor: id_valor, desde:desde, hasta:hasta}, function(datos){
          $('#respuesta-delete<?php echo $id_valor?>').html(datos);
         });
    

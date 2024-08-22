@@ -36,6 +36,29 @@ if ($cuenta>0) {
 
 }else{
     
+    $sentencia = $pdo->prepare("SELECT * FROM tb_pacientes WHERE 
+    id_paciente != :id_paciente AND
+    email =:email OR nombre =:nombre AND apellido =:apellido");
+
+    $sentencia->bindParam('id_paciente', $id_paciente);
+    $sentencia->bindParam('nombre', $nombre);
+    $sentencia->bindParam('apellido', $apellido);
+    $sentencia->bindParam('email', $email);
+
+    $sentencia->execute();
+    $cuenta = $sentencia->rowCount();
+
+    if ($cuenta>0) {
+        session_start();
+        $_SESSION['mensaje'] = 'Ya existe un usuario con ese nombre y apellido o email en la base de datos';
+        $_SESSION['icono'] = 'error';
+        ?>
+        <script>
+            window.history.back();
+        </script>
+     
+<?php }else{
+
     $sentencia2 = $pdo->prepare("UPDATE tb_pacientes SET 
     id_paciente = :id_paciente,
     nombre = :nombre,
@@ -98,6 +121,7 @@ $cuenta = $sentencia->rowCount();
     <script> location.href = "<?php echo APP_URL; ?>/view/pacientes/index.php"</script>
 <?php 
  }
+}
 }?>
 
 

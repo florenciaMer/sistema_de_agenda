@@ -2,7 +2,9 @@
 include_once('view/layout/parte1.php');
 
 include_once('controllers/pacientes/listado_de_pacientes.php');
+
 ?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -10,10 +12,11 @@ include_once('controllers/pacientes/listado_de_pacientes.php');
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Calendario de Citas</title>
     <!---- <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.js'></script> -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css" integrity="sha384-xOolHFLEh07PJGoPkLv1IbcEPTNtaed2xpHsD9ESMhqIYd0nLMwNLD69Npy4HI+N" crossorigin="anonymous">
+   
  
- 
-    <script src="fullcalendar-6.1.15/dist/index.global.min.js"></script>
+    <script src="fullcalendar-6.1.15/dist/index.global.min.js">
+     
+    </script>
 </head>
 
 <body>
@@ -43,11 +46,15 @@ var fecha_inicial="";
 var fechaInicioPrueba= "";
 var nombreApellido="";
 var titulo_evento="";
+var cadena = "";
+var calendarEl;
+var calendar;
+var evento;
+var realizada;
+document.addEventListener('DOMContentLoaded', function(events) {
 
-document.addEventListener('DOMContentLoaded', function() {
-
-  var calendarEl = document.getElementById('calendar');
-  var calendar = new FullCalendar.Calendar(calendarEl, {
+   calendarEl = document.getElementById('calendar');
+   calendar = new FullCalendar.Calendar(calendarEl, {
     initialView: 'dayGridMonth',
     locale: 'es',
     editable:true,
@@ -71,11 +78,60 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
         },
        
-       
         events:'controllers/reservas/cargar_reserva.php',
         
-        eventClick:function(info){
-       
+     eventClick:function(info){
+      let data = {   
+                titulo: info.event.title
+            };
+
+            let url = "<?php echo APP_URL;?>/controllers/reservas/cargar_reserva_title.php";
+            $.ajax({
+                type: 'GET',
+                url: url,
+                data: { titulo: data.titulo },
+                success: function(response) {
+                    var realizada = response.trim();
+                    var footer = document.getElementById("modal-footer");
+                    var btn, btn2;
+         
+        var existingBtn1 = document.getElementById("btn_deshacer_confirmar");
+        if (existingBtn1) {
+            footer.removeChild(existingBtn1);
+        }
+
+        var existingBtn2 = document.getElementById("btn-realizada");
+        if (existingBtn2) {
+            footer.removeChild(existingBtn2);
+        }
+                    if (footer) {
+                        if (realizada == '1') {
+                            btn = document.createElement("button");
+                            btn.type = "button";
+                            btn.className = "btn btn-secondary";
+                            btn.id = "btn_deshacer_confirmar";
+                            btn.innerHTML = "Deshacer cita realizada";
+                            footer.appendChild(btn);
+                        } else if (realizada == '0') {
+                            if (btn) {
+                                footer.removeChild(btn);
+                            }
+                            btn2 = document.createElement("button");
+                            btn2.type = "button";
+                            btn2.className = "btn btn-success";
+                            btn2.id = "btn-realizada";
+                            btn2.innerHTML = "Confirmar cita realizada <i class='bi bi-check-circle'></i>";
+                            footer.appendChild(btn2);
+                        }
+                    } else {
+                        console.log("No se encontró ningún elemento con el id 'modal-footer'");
+                    }
+                },
+                error: function() {
+                    Swal.fire('Error', 'No se encontró la realización en la base de datos', 'error');
+                }
+            });
+  
             var cadena = info.event.title;
             var arrayCadena = cadena.split("-");
             for (let i = 0; i < 1; i++) {
@@ -95,7 +151,7 @@ document.addEventListener('DOMContentLoaded', function() {
              
              fecha_original = year+'-'+month+'-'+day;
 
-            fecha = day+'/'+month+'/'+year; 
+            fecha = year+'-'+month+'-'+day; 
            
            
             $('#paciente_update').val(nombreApellido);
@@ -128,8 +184,9 @@ document.addEventListener('DOMContentLoaded', function() {
               fecha = arrayCadena[3]
                nombreApellido = nombre + '-' + apellido
             }
-          
+           
           titulo_evento = info.event.title;
+         
           $('#fecha_evento').val(day+'-' + month + '-' +year);
           $('#hora_evento').val(hora);
           $('#nombre_paciente').val(nombreApellido);
@@ -146,8 +203,8 @@ document.addEventListener('DOMContentLoaded', function() {
       });
       
       calendar.render();
+      
 
-            
     });
    
    
@@ -162,7 +219,7 @@ function recuperar_datos_form(info){
   
   fecha_original = year+'-'+month+'-'+day;
 
-  var cadena = info.event.title;
+   cadena = info.event.title;
   var arrayCadena = cadena.split("-");
   for (let i = 0; i < 1; i++) {
     nombre = arrayCadena[1]
@@ -178,9 +235,7 @@ function recuperar_datos_form(info){
    paciente : nombreApellido,
   
  }
- console.log(fecha_cita);
- console.log(hora_cita);
- console.log(id_paciente);
+ 
  return registro;
 }
 </script>
@@ -225,7 +280,7 @@ include_once('view/layout/mensajes.php');
                     foreach ($pacientes_datos as $paciente) {
                         ?>
                         <option value="<?php echo $paciente['id_paciente'];?>">
-                        <?php echo $paciente['nombre'];?>
+                        <?php echo $paciente['nombre'].'-'. $paciente['apellido']?>
                         </option>
                     <?php
                         }
@@ -278,16 +333,25 @@ include_once('view/layout/mensajes.php');
                     <input type="text" id="fecha_cita_update" class="form-control" name="fecha_cita_update" disabled >
                 </div>
             </div>
+            
         <div class="row">
          
            
         </div>
       </div>
-      <div class="modal-footer">
+      <div class="modal-footer" id="modal-footer">
+      <script>
+      
+
+    
+      </script>
+      
+           
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
         <button type="submit" class="btn btn-primary" id="btn-delete" >Borrar</button>
       </div>
       <div id="respuesta_delete"></div>
+      <div id="respuesta_realizada"></div>
     </div>
 
 
@@ -389,11 +453,25 @@ $('#btn_modificar_reserva').click(function(){
   }else{
     let url = "<?php echo APP_URL;?>/controllers/reservas/modificar_reserva.php";
     var fecha= $('#fecha_evento').val();
-    var hora= $('#hora_evento').val();
-    var nombre= $('#nombre').val();
-    var apellido= $('#apellido').val();
-    var title_anterior= $('#titulo_evento').val();
-    var title_nuevo = hora +'-'+nombre+'-'+apellido+'-'+fecha;
+
+    // Convertir la cadena a un objeto Date
+    let dateParts = fecha.split("-"); // Separa la cadena en partes [yyyy, mm, dd]
+    let year = parseInt(dateParts[0], 10);
+    let month = parseInt(dateParts[1], 10) - 1; // Los meses en JavaScript van de 0 a 11
+    let day = parseInt(dateParts[2], 10);
+
+    let fechaDate = new Date(year, month, day);
+
+    // Formatear la fecha como día-mes-año
+    let fecha_formateada = day + '-' + (month + 1) + '-' + year;
+    alert(fecha_formateada)
+    let hora = $('#hora_evento').val();
+    let nombre = $('#nombre').val();
+    let apellido = $('#apellido').val();
+    let title_anterior = $('#titulo_evento').val();
+    
+    let title_nuevo = hora + '-' + nombre + '-' + apellido + '-' + fecha_formateada;
+
 
     $.ajax({
           type: 'GET',
@@ -411,4 +489,237 @@ $('#btn_modificar_reserva').click(function(){
       }
     }) 
     
+</script>
+<script>
+  $(document).on('click', '#btn-realizada', function() {
+//$('#btn-realizada').click(function() {
+
+
+  var modal_evento = document.getElementById("modal_evento");
+    var footer = document.getElementById("modal-footer"); // Asegúrate de que el ID sea correcto
+
+    if (modal_evento) {
+        // Elimina los botones existentes antes de agregar nuevos
+        var existingBtn1 = document.getElementById("btn_deshacer_confirmar");
+        if (existingBtn1) {
+            footer.removeChild(existingBtn1);
+        }
+
+        var existingBtn2 = document.getElementById("btn-realizada");
+        if (existingBtn2) {
+            footer.removeChild(existingBtn2);
+        }
+
+        // Crea y agrega el nuevo botón basado en el valor de 'realizada'
+        if (realizada == '1') {
+            console.log('realizada valor 1');
+            var btn = document.createElement("button");
+            btn.type = "button";
+            btn.className = "btn btn-secondary";
+            btn.id = "btn_deshacer_confirmar";
+            btn.innerHTML = "Deshacer cita realizada";
+            footer.appendChild(btn);
+        } else if (realizada == '0') {
+            var btn2 = document.createElement("button");
+            btn2.type = "button";
+            btn2.className = "btn btn-success";
+            btn2.id = "btn-realizada";
+            btn2.innerHTML = "Confirmar cita realizada <i class='bi bi-check-circle'></i>";
+            footer.appendChild(btn2);
+        }
+      }
+    var hora_cita = $('#hora_cita_update').val();
+    var fecha_cita = $('#fecha_cita_update').val();
+    var cadena = $('#paciente_update').val();
+
+    var arrayCadena = cadena.split("-");
+    let nombre = arrayCadena[0].trim();
+    let apellido = arrayCadena[1].trim();
+
+    if (fecha_cita && hora_cita && nombre && apellido) {
+
+      var partesFecha = fecha_cita.split('/');
+        var dia = partesFecha[0].padStart(2, '0');
+        var mes = partesFecha[1].padStart(2, '0');
+        var año = partesFecha[2];
+        var fecha = `${año}-${mes}-${dia}`
+
+       // var fecha = fecha_cita.split('/').reverse().join('-');
+        let eventos = calendar.getEvents();
+        let eventoEncontrado = null;
+
+        for (let evento of eventos) {
+            //let eventoFecha = evento.start.toISOString().split('T')[0]; // Fecha en formato YYYY-MM-DD
+            //let eventoHora = evento.start.toTimeString().split(':')[0].substring(0, 5); // Hora en formato HH:MM
+            let titulo = hora+'-'+nombre+ '-'+ apellido+'-'+fecha;
+            console.log('fecha chat gpt')
+
+            console.log('Evento en calendario:', evento.title);
+            console.log('Título esperado:', titulo);
+
+            if (evento.title == titulo) {
+                  
+                eventoEncontrado = evento;
+                console.log("ENCONTRADO por confirmar !!!!!!*****")
+                break;
+            }
+        }
+
+        if (eventoEncontrado) {
+            eventoEncontrado.setProp('backgroundColor', '#67de1f');
+            eventoEncontrado.setProp('borderColor', '#67de1f');
+            calendar.render(); // Refrescar los eventos para aplicar los cambios
+           
+          
+            let url = "<?php echo APP_URL;?>/controllers/reservas/guardar_color.php";;  // Reemplaza con la ruta correcta
+            $.ajax({
+                type: 'POST',
+                url: url,
+                data: {
+                    titulo: eventoEncontrado.title,  // Asegúrate de que el evento tenga un ID único
+                    backgroundColor: '#67de1f',
+                    borderColor: '#67de1f'
+                },
+                success: function(response) {
+                    console.log('Color actualizado en la base de datos.');
+                },
+                error: function(xhr, status, error) {
+                    console.error('Error al actualizar el color en la base de datos:', error);
+                }
+            });
+            calendar.render(); // Refrescar los eventos para aplicar los cambios
+
+        } else {
+            console.log('No se encontró el evento en la fecha y hora especificada.');
+        }
+    }
+    $(document).ready(function() {
+  // Tu código para agregar el botón al modal aquí
+  
+  
+});
+   let url = "<?php echo APP_URL;?>/controllers/reservas/realizadas.php";
+    $.ajax({
+        type: 'GET',
+        url: url,
+        data: { fecha_cita: fecha_original, hora_cita: hora_cita, nombre: nombre, apellido: apellido },
+        success: function(response) {
+            $('#respuesta_realizada').html(response);
+        },
+    });
+  } )
+
+
+</script>
+<script>
+$(document).on('click', '#btn_deshacer_confirmar', function() {
+//$('#btn_deshacer_confirmar').click(function(){
+var cadena = $('#paciente_update').val();
+var hora_cita = $('#hora_cita_update').val();
+var fecha_cita = $('#fecha_cita_update').val();
+
+//convierto la fecha primero el año
+if (fecha_cita) {
+    // Si la fecha es del formato YYYY-MM-DD o similar
+    let fecha = new Date(fecha_cita);
+    
+    if (!isNaN(fecha)) {
+        let year = fecha.getFullYear();
+        let month = fecha.getMonth() + 1;
+        let day = fecha.getDate();
+
+        // Asegurar formato de dos dígitos para el mes y día
+        month = month < 10 ? '0' + month : month;
+        day = day < 10 ? '0' + day : day;
+
+        let fecha_original = year + '-' + month + '-' + day;
+        console.log(fecha_original);
+    }
+  }
+
+var arrayCadena = cadena.split("-");
+
+var hora_cita = $('#hora_cita_update').val();
+    var fecha_cita = $('#fecha_cita_update').val();
+    var cadena = $('#paciente_update').val();
+
+    var arrayCadena = cadena.split("-");
+    let nombre = arrayCadena[0].trim();
+    let apellido = arrayCadena[1].trim();
+
+    if (fecha_cita && hora_cita && nombre && apellido) {
+
+      var partesFecha = fecha_cita.split('/');
+        var dia = partesFecha[0].padStart(2, '0');
+        var mes = partesFecha[1].padStart(2, '0');
+        var año = partesFecha[2];
+        var fecha = `${año}-${mes}-${dia}`
+
+       // var fecha = fecha_cita.split('/').reverse().join('-');
+        let eventos = calendar.getEvents();
+        let eventoEncontrado = null;
+
+        for (let evento of eventos) {
+            //let eventoFecha = evento.start.toISOString().split('T')[0]; // Fecha en formato YYYY-MM-DD
+            //let eventoHora = evento.start.toTimeString().split(':')[0].substring(0, 5); // Hora en formato HH:MM
+            let titulo = hora+'-'+nombre+ '-'+ apellido+'-'+fecha;
+            
+
+            console.log('Evento en calendario:', evento.title);
+            console.log('Título esperado:', titulo);
+
+            if (evento.title == titulo) {
+                  
+                eventoEncontrado = evento;
+                console.log("ENCONTRADO deshacer confirmar!!!!!*****")
+                break;
+            }
+        }
+
+        if (eventoEncontrado) {
+            eventoEncontrado.setProp('backgroundColor', '#67de1f');
+            eventoEncontrado.setProp('borderColor', '#67de1f');
+            calendar.render(); // Refrescar los eventos para aplicar los cambios
+           
+            let url = "<?php echo APP_URL;?>/controllers/reservas/guardar_color.php";;  // Reemplaza con la ruta correcta
+            $.ajax({
+                type: 'POST',
+                url: url,
+                data: {
+                    titulo: eventoEncontrado.title,  // Asegúrate de que el evento tenga un ID único
+                    backgroundColor: '#3788d8',
+                    borderColor: '#3788d8'
+                },
+                success: function(response) {
+                    console.log('Color actualizado en la base de datos.');
+                },
+                error: function(xhr, status, error) {
+                    console.error('Error al actualizar el color en la base de datos:', error);
+                }
+            });
+           
+            calendar.render(); // Refrescar los eventos para aplicar los cambios
+
+        } else {
+            console.log('No se encontró el evento en la fecha y hora especificada.');
+        }
+        /********************************************************** */
+      // Obtenemos el precio para cada cita
+
+
+
+      let url = "<?php echo APP_URL;?>/controllers/reservas/deshacer_confirmar.php";
+      $.ajax({
+            type: 'GET',
+            url: url,
+            data: { fecha_cita: fecha_original, hora_cita: hora_cita, nombre:nombre, apellido:apellido },
+            success: function(response) {
+              $('#respuesta_realizada').html(response);
+            
+          },
+          
+        });
+      }
+      })
+     
 </script>
