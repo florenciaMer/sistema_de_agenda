@@ -33,6 +33,7 @@ include_once('../../controllers/facturacion/listado_de_citas.php')
                             <th>Fecha</th>
                             <th>Hora</th>
                             <th>Estado</th>
+                            <th>Precios - Acción</th>
                             <th>Pago - Acción</th>
                           
                         </tr>
@@ -48,7 +49,7 @@ include_once('../../controllers/facturacion/listado_de_citas.php')
                                 $desde = $cita['fecha_cita'];
                                 $hora = $cita['hora_cita'];
                                 $pagado = $cita['pagado'];
-                                //$precio = $cita['precio'];
+                                $precio = $cita['precio'];
                                 //$total += $precio;
                                // echo $total;
                               
@@ -79,7 +80,25 @@ include_once('../../controllers/facturacion/listado_de_citas.php')
                              <td>Sin realizar</td>
                            <?php } ?>
                            
-                           <!-- pago -->
+                            <!-- valida si tiene lista de precio asociada accion -->
+                            <?php if (isset($cita['precio'])) {
+                              ?>
+                              <td>$<?php echo $cita['precio'];?></td>
+                           <?php }else{?>
+
+                             <td>
+                              Sin Lista de precios 
+                              <form action="../valores/create_para_un_paciente.php" method="post">
+                              <input type="hidden" name="id_paciente" value="<?php echo $id_paciente; ?>">
+                              <button type="submit" class="btn btn-primary btn-sm cargar-precio" id="cargar-precio<?php echo $id_paciente;?>">
+                                  Cargar precio
+                                  <i class="bi bi-pencil"></i>
+                                </button>
+                              </button>
+                          </form>
+                            </td>
+                              <?php }?>
+                           <!-- pago accion -->
                            <?php if ($cita['pagado'] == '1') {
                               ?>
                               <td>Paga</td>
@@ -97,7 +116,8 @@ include_once('../../controllers/facturacion/listado_de_citas.php')
                             <i class="bi bi-pencil"></i>
                           </button>
                             </td>
-          </td>
+          
+          
                            <?php } ?>
                 
                            <!-- <td>
@@ -111,7 +131,6 @@ include_once('../../controllers/facturacion/listado_de_citas.php')
                         <?php  }?>
                            <div id="respuesta-facturar" ></div>
 
-                          
                      
                         </tr>
                     </tbody>
