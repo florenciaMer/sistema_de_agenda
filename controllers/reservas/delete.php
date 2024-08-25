@@ -5,7 +5,8 @@ include '../config.php';
 // Retrieve GET parameters
 $fecha = $_GET['fecha'];
 $hora = $_GET['hora'];
-
+echo $fecha;
+echo $hora;
 // Set the values to be updated
 $estado = 0;
 

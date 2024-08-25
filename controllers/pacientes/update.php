@@ -36,14 +36,14 @@ if ($cuenta>0) {
 
 }else{
     
-    $sentencia = $pdo->prepare("SELECT * FROM tb_pacientes WHERE 
-    id_paciente != :id_paciente AND
-    email =:email OR nombre =:nombre AND apellido =:apellido");
+    $sentencia = $pdo->prepare("SELECT * FROM tb_pacientes 
+    WHERE id_paciente != :id_paciente 
+    AND nombre = :nombre 
+    AND apellido = :apellido;");
 
     $sentencia->bindParam('id_paciente', $id_paciente);
     $sentencia->bindParam('nombre', $nombre);
     $sentencia->bindParam('apellido', $apellido);
-    $sentencia->bindParam('email', $email);
 
     $sentencia->execute();
     $cuenta = $sentencia->rowCount();

@@ -18,7 +18,11 @@ if (empty($desde) || empty($hasta)) {
 }
 
 // Construye la consulta SQL para citas
-$sql_citas = "SELECT * FROM tb_reservas WHERE fecha_cita BETWEEN '$desde' AND '$hasta' AND estado = '1'";
+$sql_citas = "SELECT *
+FROM tb_reservas
+INNER JOIN tb_pacientes ON tb_reservas.id_paciente = tb_pacientes.id_paciente
+WHERE fecha_cita BETWEEN '$desde' AND '$hasta'
+AND tb_reservas.estado = '1';";
 $result_citas = $conn->query($sql_citas);
 
 if (!$result_citas) {
@@ -26,37 +30,20 @@ if (!$result_citas) {
     exit();
 }
 
-// Construye la consulta SQL para pacientes
-$sql_pacientes = "SELECT * FROM tb_pacientes WHERE estado = '1'";
-$result_pacientes = $conn->query($sql_pacientes);
-
-if (!$result_pacientes) {
-    echo json_encode(['status' => 'error', 'message' => 'Error en la consulta de pacientes: ' . $conn->error]);
-    exit();
-}
-
-// Almacena los datos de pacientes en un array
-$pacientes = [];
-while ($paciente = $result_pacientes->fetch_assoc()) {
-    $pacientes[$paciente['id_paciente']] = $paciente;
-}
 
 // Construye el HTML para la respuesta
 $html = '';
 if ($result_citas->num_rows > 0) {
     while ($cita = $result_citas->fetch_assoc()) {
-        $paciente = isset($pacientes[$cita['id_paciente']]) ? $pacientes[$cita['id_paciente']] : [];
-        $nombre = isset($paciente['nombre']) ? $paciente['nombre'] : '';
-        $apellido = isset($paciente['apellido']) ? $paciente['apellido'] : '';
+        
         
         $html .= "<tr>
-                    <td>{$nombre}</td>
-                    <td>{$apellido}</td>
-                    <td>{$cita['fecha_cita']}</td>
+                    <td>{$cita['nombre']}</td>
+                    <td>{$cita['apellido']}</td>
+                    <td>" . date('d-m-Y', strtotime($cita['fecha_cita'])) . "</td>
                     <td>{$cita['hora_cita']}</td>
-                   
-                  <td>" . ($cita['realizada'] == 0 ? 'Sin realizar' : 'Realizada') . "</td>
-                  <td>" . ($cita['pagado'] == 0 ? 'Impago' : 'Pago') . "</td>
+                    <td>" . ($cita['realizada'] == 0 ? 'Sin realizar' : 'Realizada') . "</td>
+                    <td>" . ($cita['pagado'] == 0 ? 'Impago' : 'Pago') . "</td>
                   </tr>";
     }
 } else {

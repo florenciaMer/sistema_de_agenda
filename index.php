@@ -12,12 +12,12 @@ include_once('controllers/pacientes/listado_de_pacientes.php');
     <script src="fullcalendar-6.1.15/dist/index.global.min.js"></script>
 </head>
 <body>
-    <div class="container">
+    <div class="container" id="container-principal">
         <div class="row" style="margin-left: 3%;">
             <div class="col"></div>
             <div class="col-md-12 m-2">
-                <h1>Reserva de Citas</h1>
-                <div class="d-flex justify-content-center">
+                <h1 style="display: flex; justify-content: center;">Reserva de Citas</h1>
+                <div id="calendar-container">
                     <div id='calendar' class="w-100"></div>
                 </div>
             </div>
@@ -25,11 +25,32 @@ include_once('controllers/pacientes/listado_de_pacientes.php');
         </div>
     </div>
 </body>
+<style>
+    #container-principal{
+        margin-left: 10%;
+    }
+    #calendar-container {
+    
+    display: flex;
+    justify-content: flex-end; /* Alinea el contenido a la derecha */
+    padding: 10px; /* Opcional: Añadir espacio alrededor del contenedor */
+    margin-right: 30px; /* Añadir margen a la derecha para desplazar el calendario más a la derecha */
+}
 
+#calendar {
+    width: 80%; /* Ajusta el ancho del calendario según sea necesario */
+    max-width: 1200px; /* Opcional: Limita el ancho máximo del calendario */
+    margin: 0 auto;
+    height: calc(100vh - 100px); /* Ajusta la altura según necesites */
+}
+</style>
 <script>
   let eventos;
   var realizada = 0;
   let calendar;
+  let title_anterior_registro;
+   
+
 document.addEventListener('DOMContentLoaded', function() {
   
     var calendarEl = document.getElementById('calendar');
@@ -39,6 +60,14 @@ document.addEventListener('DOMContentLoaded', function() {
         editable: true,
         selectable: true,
         allDaySlot: false,
+        height: 'auto',               // Ajusta automáticamente a la altura del contenedor
+        contentHeight: 'auto',        // Opcional: Ajusta la altura del contenido
+        expandRows: true,             // Expande filas para que todo el mes sea visible sin scroll
+        headerToolbar: {
+        left: '',            // No hay elementos a la izquierda
+        center: '',          // No hay elementos en el centro
+        right: 'title'       // Coloca el título a la derecha
+    },
         events: 'controllers/reservas/cargar_reserva.php',
         dateClick: function(info) {
             var fechaSeleccionada = info.dateStr;
@@ -49,70 +78,88 @@ document.addEventListener('DOMContentLoaded', function() {
             $('#fecha_cita').val(fechaSeleccionada);
         },
         eventClick: function(info) {
-            var titulo = info.event.title;
-            var url = "<?php echo APP_URL;?>/controllers/reservas/cargar_reserva_title.php";
-            $.ajax({
-                type: 'GET',
-                url: url,
-                data: { titulo: titulo },
-                success: function(response) {
-                    var realizada = response.trim();
-                    var footer = document.getElementById("modal-footer");
-                    var btn, btn2;
+    var titulo = info.event.title;
+    var url = "<?php echo APP_URL;?>/controllers/reservas/cargar_reserva_title.php";
 
-                    // Eliminar botones existentes
-                    var existingBtn1 = document.getElementById("btn_deshacer_confirmar");
-                    if (existingBtn1) footer.removeChild(existingBtn1);
-                    var existingBtn2 = document.getElementById("btn-realizada");
-                    if (existingBtn2) footer.removeChild(existingBtn2);
+    $.ajax({
+        type: 'GET',
+        url: url,
+        data: { titulo: titulo },
+        success: function(response) {
+            var realizada = response.trim();
+            var footer = document.getElementById("modal_footer_realizada");
 
-                    // Agregar botones según el estado 'realizada'
-                    if (footer) {
-                        if (realizada == '1') {
-                            btn = document.createElement("button");
-                            btn.type = "button";
-                            btn.className = "btn btn-secondary";
-                            btn.id = "btn_deshacer_confirmar";
-                            btn.innerHTML = "Deshacer cita realizada";
-                            footer.appendChild(btn);
-                        } else if (realizada == '0') {
-                            btn2 = document.createElement("button");
-                            btn2.type = "button";
-                            btn2.className = "btn btn-success";
-                            btn2.id = "btn-realizada";
-                            btn2.innerHTML = "Confirmar cita realizada <i class='bi bi-check-circle'></i>";
-                            footer.appendChild(btn2);
-                        }
-                    } else {
-                        console.log("No se encontró ningún elemento con el id 'modal-footer'");
-                    }
-                },
-                error: function() {
-                    Swal.fire('Error', 'No se encontró la realización en la base de datos', 'error');
+            // Asegúrate de que el footer esté correctamente asignado
+            console.log("footer:", footer);
+
+            if (footer) {
+                // Depura los botones existentes
+                var existingBtn1 = document.getElementById("btn_deshacer_confirmar");
+                var existingBtn2 = document.getElementById("btn-realizada");
+                
+                console.log("Existing Button 1:", existingBtn1);
+                console.log("Existing Button 2:", existingBtn2);
+
+                // Eliminar botones existentes si están presentes
+                if (existingBtn1 && footer.contains(existingBtn1)) {
+                    footer.removeChild(existingBtn1);
                 }
-            });
+                if (existingBtn2 && footer.contains(existingBtn2)) {
+                    footer.removeChild(existingBtn2);
+                }
 
+                // Agregar botones según el estado 'realizada'
+                if (realizada === '1') {
+                    var btn = document.createElement("button");
+                    btn.type = "button";
+                    btn.className = "btn btn-secondary";
+                    btn.id = "btn_deshacer_confirmar";
+                    btn.innerHTML = "Deshacer cita realizada";
+                    footer.appendChild(btn);
+                } else if (realizada === '0') {
+                    var btn2 = document.createElement("button");
+                    btn2.type = "button";
+                    btn2.className = "btn btn-success";
+                    btn2.id = "btn-realizada";
+                    btn2.innerHTML = "Confirmar cita realizada <i class='bi bi-check-circle'></i>";
+                    footer.appendChild(btn2);
+                }
+            } else {
+                console.error("No se encontró el elemento con el ID 'modal_footer_realizada'.");
+            }
+
+            // Procesar la información de la cita
             var arrayCadena = titulo.split("-");
             if (arrayCadena.length >= 4) {
                 var hora = arrayCadena[0];
                 var nombre = arrayCadena[1];
                 var apellido = arrayCadena[2];
-              
+
                 var fecha = info.event.start;
                 let year = fecha.getFullYear();
                 let month = fecha.getMonth() + 1;
                 let day = fecha.getDate();
-                 fecha = `${day.toString().padStart(2, '0')}-${month.toString().padStart(2, '0')}-${year}`;
- 
+                fecha = `${day.toString().padStart(2, '0')}-${month.toString().padStart(2, '0')}-${year}`;
+
                 console.log(fecha)
                 var nombreApellido = nombre + '-' + apellido;
 
                 $('#paciente_update').val(nombreApellido);
                 $('#fecha_cita_update').val(fecha);
                 $('#hora_cita_update').val(hora);
+
+                // Mostrar el modal después de actualizar el contenido
+                title_anterior_registro = info.event.title;
                 $('#modal_evento').modal('show');
             }
         },
+        error: function() {
+            Swal.fire('Error', 'No se encontró la realización en la base de datos', 'error');
+        }
+    });
+},
+
+
         eventDrop: function(info) {
             var fecha = info.event.start;
             let year = fecha.getFullYear();
@@ -128,7 +175,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 var fechaEvento = arrayCadena[3];
                 var nombreApellido = nombre + ' ' + apellido;
 
-                $('#fecha_evento').val(`${day}-${month}-${year}`);
+                $('#fecha_evento').val(`${day.toString().padStart(2, '0')}-${month.toString().padStart(2, '0')}-${year}`);
                 $('#hora_evento').val(hora);
                 $('#nombre_paciente').val(nombreApellido);
                 $('#nombre').val(nombre);
@@ -209,7 +256,7 @@ function actualizarColorEvento(hora, nombre, apellido, fecha, color) {
 </script>
 
 <?php
-include_once('view/layout/parte2.php');
+include_once('view/layout/parte2_agenda.php');
 include_once('view/layout/mensajes.php');
 ?>
 
@@ -262,7 +309,7 @@ include_once('view/layout/mensajes.php');
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="exampleModalLabel"> <span id="dia_de_la_semana"></span></h5>
+                <h5 class="modal-title" id="exampleModalLabel"> <span id="dia_de_la_semana">Reserva:</span></h5>
                 <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                 </button>
@@ -275,7 +322,7 @@ include_once('view/layout/mensajes.php');
                     </div>
                     <div class="col-md-6">
                         <label>Horario</label>
-                        <input type="text" id="hora_cita_update" name="hora_cita" class="form-control" disabled>
+                        <input type="text" id="hora_cita_update" name="hora_cita" class="form-control" >
                     </div>
                     <div class="col-md-6">
                         <label>Fecha</label>
@@ -283,9 +330,93 @@ include_once('view/layout/mensajes.php');
                     </div>
                 </div>
             </div>
-            <div class="modal-footer" id="modal-footer">
+            <div class="modal-footer " id="modal_footer_realizada">
+                
+                <button type="button" class="btn btn-info" id="btn-modificar-hora" >Modificar</button>
+                <button type="submit" class="btn btn-primary" id="btn-delete" >Borrar</button>
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
-            </div>
+        <div id="respuesta_delete"></div>
+        <div id="respuesta_modificar_hora"></div>
+      </div>
+    </div>
+    <script>
+
+$('#btn-delete').click(function() {
+    var fecha_formateada_borrar = ''; // Inicializa la variable con un valor vacío
+    var paciente = $('#paciente_update').val();
+    var arrayCadena = paciente.split("-");
+
+    // Verificar que la cadena tiene al menos dos partes
+    if (arrayCadena.length >= 2) {
+        var nombre = arrayCadena[0].trim();
+        var apellido = arrayCadena[1].trim();
+    }
+
+    var hora_cita = $('#hora_cita_update').val();
+    var fecha_cita = $('#fecha_cita_update').val();
+
+    // Verificar que la fecha tiene un valor y el formato esperado
+    if (fecha_cita) {
+        var partes = fecha_cita.split('-'); // Asumiendo que la fecha viene en formato "dd-mm-yyyy"
+        console.log("Partes de la fecha: ", partes);
+
+        if (partes.length === 3) {
+            var dia = partes[0];
+            var mes = partes[1];
+            var año = partes[2];
+
+            fecha_formateada_borrar = año + '-' + mes + '-' + dia;
+            console.log("Fecha reformateada: " + fecha_formateada_borrar);
+        } else {
+            console.log("Error: La fecha no está en el formato esperado.");
+        }
+    } else {
+        console.log("Error: No se pudo obtener el valor de #fecha_cita_update.");
+    }
+
+    console.log('Fecha formateada para borrar:', fecha_formateada_borrar);
+
+console.log(hora_cita)
+
+Swal.fire({
+  showDenyButton: true,
+  showCancelButton: true,
+  confirmButtonText: 'Yes',
+  title: '¿Está seguro de eliminar la reserva de '+ nombre + '-' + apellido  + '-' + fecha_cita + '-' + hora_cita +'hs',
+  denyButtonText: 'No',
+  customClass: {
+    actions: 'my-actions',
+    cancelButton: 'order-1 right-gap',
+    confirmButton: 'order-2',
+    denyButton: 'order-3',
+  },
+}).then((result) => {
+  if (result.isConfirmed) {
+    let url = "<?php echo APP_URL;?>/controllers/reservas/delete.php";
+    $.ajax({
+          type: 'GET',
+          url: url,
+          data: { fecha: fecha_formateada_borrar, hora: hora_cita },
+          success: function(response) {
+            $('#respuesta_delete').html(response);
+            Swal.fire('Reserva eliminada', '', 'success');
+            $('#modal_evento').modal('hide'); // Hide the modal after success
+          },
+          error: function() {
+            Swal.fire('Error', 'No se pudo eliminar la reserva', 'error');
+          }
+        });
+      } else if (result.isDenied) {
+        Swal.fire('Los cambios no se guardaron', '', 'info');
+      }
+})
+
+})
+
+</script>
+  </div>
+</div> <!-- fin modal evento -->
+
         </div>
     </div>
 </div> <!-- fin modal evento -->
@@ -321,60 +452,129 @@ include_once('view/layout/mensajes.php');
                         </div>
                         <div class="col-md-6">
                             <label>Horario</label>
-                            <input type="text" id="hora_evento" name="hora_evento" class="form-control" disabled>
+                            <input type="text" id="hora_evento" name="hora_evento" class="form-control" >
                         </div>
                     </div>
                 </form>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
-                <button type="button" class="btn btn-primary" id="btn_guardar_cambios">Guardar Cambios</button>
+                <button type="button" class="btn btn-primary" id="btn_modificar_reserva">Guardar Cambios</button>
+           <div id="respuesta_modificar_reserva"></div>
             </div>
         </div>
     </div>
 </div> <!-- fin modal modificar reserva -->
+<script>
+$('#btn-modificar-hora').click(function() {
+    
+    if ($('#hora_cita_update').val() == "") {
+        alert("Ingrese la hora");
+    } else {
+        var hora = $('#hora_cita_update').val();
+        var fecha = $('#fecha_cita_update').val();
+        var cadena = $('#paciente_update').val();
+        var arrayCadena = cadena.split("-");
 
+        var nombre = "";
+        var apellido = "";
+
+        if (arrayCadena.length >= 2) {
+            nombre = arrayCadena[0].trim();
+            apellido = arrayCadena[1].trim();
+        }
+
+        var fecha_formateada = "";
+
+        if (fecha && fecha.length === 10) {
+            var partesFecha = fecha.split('-');
+            if (partesFecha.length === 3) {
+                var dia = partesFecha[0].padStart(2, '0');
+                var mes = partesFecha[1].padStart(2, '0');
+                var año = partesFecha[2];
+                fecha_formateada = `${año}-${mes}-${dia}`;
+            }
+        }
+
+        let title_nuevo = hora + '-' + nombre + '-' + apellido + '-' + fecha_formateada;
+        let url = "<?php echo APP_URL;?>/controllers/reservas/modificar_horario_reserva.php";
+
+        $.get(url, {title_nuevo: title_nuevo, fecha:fecha_formateada, hora:hora,
+            title_anterior: title_anterior_registro
+        }, function(datos){
+         $('#respuesta_modificar_hora').html(datos);
+        });
+        }
+    });
+    
+
+  
+
+
+   
+
+
+    
+</script>
 <script>
   $('#btn_modificar_reserva').click(function(){
   if($('#hora_evento').val() == ""){
     alert("Ingrese la hora");
   }else{
-    let url = "<?php echo APP_URL;?>/controllers/reservas/modificar_reserva.php";
-    var fecha= $('#fecha_evento').val();
+  
+// Obtener el valor de la fecha
+var fecha = $('#hora_evento').val();
+var fecha = $('#fecha_evento').val();
+var fecha_formateada;
+console.log('Fecha original:', fecha);
 
-    // Convertir la cadena a un objeto Date
-    let dateParts = fecha.split("-"); // Separa la cadena en partes [yyyy, mm, dd]
-    let year = parseInt(dateParts[0], 10);
-    let month = parseInt(dateParts[1], 10) - 1; // Los meses en JavaScript van de 0 a 11
-    let day = parseInt(dateParts[2], 10);
+// Asegúrate de que la fecha esté en el formato correcto
+if (fecha && fecha.length === 10) {
+    // Dividir la fecha en partes
+    let dateParts = fecha.split("-");
+    console.log('Partes de la fecha:', dateParts);
 
-    let fechaDate = new Date(year, month, day);
+    var partesFecha = fecha.split('-');
+    
+    console.log("Partes de la fecha:", partesFecha);
+
+    if (partesFecha.length === 3) {
+        var dia = (partesFecha[0] || '').padStart(2, '0');
+        var mes = (partesFecha[1] || '').padStart(2, '0');
+        var año = partesFecha[2];
+         fecha_formateada = `${año}-${mes}-${dia}`;
+        
+        console.log("Fecha convertida************:", fecha); 
+    } 
+}
 
     // Formatear la fecha como día-mes-año
-    let fecha_formateada = day + '-' + (month + 1) + '-' + year;
- 
-    let hora = $('#hora_evento').val();
+    let hora = $('#hora_evento').val()
     let nombre = $('#nombre').val();
     let apellido = $('#apellido').val();
     let title_anterior = $('#titulo_evento').val();
     
     let title_nuevo = hora + '-' + nombre + '-' + apellido + '-' + fecha_formateada;
-
+    
+    let url = "<?php echo APP_URL;?>/controllers/reservas/modificar_reserva.php";
 
     $.ajax({
           type: 'GET',
           url: url,
-          data: { title_nuevo:title_nuevo,title_anterior:title_anterior, fecha:fecha_original, hora:hora },
+          data: { title_nuevo:title_nuevo,title_anterior:title_anterior, fecha:fecha_formateada, hora:hora },
           success: function(response) {
-            $('#respuesta_modificar').html(response);
-            Swal.fire('Reserva modificada', '', 'success');
-            $('#modal_evento').modal('hide'); // Hide the modal after success
+            $('#btn_modificar_reserva').html(response);
+            calendar.refetchEvents(); // Actualiza los eventos del calendario   
+           //Swal.fire('Reserva modificada', '', 'success');
+            $('#modal_modificar_reserva').modal('hide'); // Hide the modal after success
           },
+          
           error: function() {
             Swal.fire('Error', 'No se pudo cambiar la reserva', 'error');
           }
         });
       }
+   
     }) 
     
 </script>
@@ -382,8 +582,7 @@ include_once('view/layout/mensajes.php');
   $(document).on('click', '#btn-realizada', function() {
 
   var modal_evento = document.getElementById("modal_evento");
-    var footer = document.getElementById("modal-footer"); // Asegúrate de que el ID sea correcto
-
+  var footer = document.getElementById("modal_footer_realizada");
     if (modal_evento) {
         // Elimina los botones existentes antes de agregar nuevos
         var existingBtn1 = document.getElementById("btn_deshacer_confirmar");
@@ -392,6 +591,9 @@ include_once('view/layout/mensajes.php');
         }
 
         var existingBtn2 = document.getElementById("btn-realizada");
+        console.log('btn2****')
+        console.log(btn2)
+        console.log("Footer HTML:", footer.innerHTML);
         if (existingBtn2) {
             footer.removeChild(existingBtn2);
         }

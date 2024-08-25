@@ -32,7 +32,7 @@ include_once('../../controllers/facturacion/listado_de_citas.php')
                             <th>Apellido</th>
                             <th>Fecha</th>
                             <th>Hora</th>
-                            <th>Estado</th>
+                            <th>Estado</th> <!--realizada o no-->
                             <th>Precios - Acción</th>
                             <th>Pago - Acción</th>
                           
@@ -74,19 +74,16 @@ include_once('../../controllers/facturacion/listado_de_citas.php')
                            <!-- <td>$<?php echo $total;?></td> -->
                             <?php if ($cita['realizada'] == '1') {
                               ?>
-                              <td>Realizada</td>
+                              <td class="bg-success">Confirmada</td>
                            <?php }else{?>
 
-                             <td>Sin realizar</td>
+                             <td class="bg-warning">Sin Confirmar</td>
                            <?php } ?>
                            
                             <!-- valida si tiene lista de precio asociada accion -->
-                            <?php if (isset($cita['precio'])) {
+                            <?php if ($cita['precio'] === 'not_precio') {
                               ?>
-                              <td>$<?php echo $cita['precio'];?></td>
-                           <?php }else{?>
-
-                             <td>
+                              <td>
                               Sin Lista de precios 
                               <form action="../valores/create_para_un_paciente.php" method="post">
                               <input type="hidden" name="id_paciente" value="<?php echo $id_paciente; ?>">
@@ -95,8 +92,12 @@ include_once('../../controllers/facturacion/listado_de_citas.php')
                                   <i class="bi bi-pencil"></i>
                                 </button>
                               </button>
-                          </form>
                             </td>
+                            <?php }else{?>
+                              <td style="text-align: center;">$<?php echo $cita['precio'];?></td>
+
+                             
+                          </form>
                               <?php }?>
                            <!-- pago accion -->
                            <?php if ($cita['pagado'] == '1') {
