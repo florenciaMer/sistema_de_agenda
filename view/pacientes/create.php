@@ -77,7 +77,7 @@ include_once('../layout/parte1.php');
                                 <div class="col-md-6">
                                     <div class="form-group">
                                         <label for="email">Email</label>
-                                        <input type="email" id="email" name="email" class="form-control" required >
+                                        <input type="email" id="email" name="email" class="form-control" >
                                     </div>
                                 </div>
                                

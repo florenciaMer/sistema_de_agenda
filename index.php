@@ -4,12 +4,14 @@ include_once('controllers/pacientes/listado_de_pacientes.php');
 ?>
 
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Calendario de Citas</title>
     <script src="fullcalendar-6.1.15/dist/index.global.min.js"></script>
+   
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/locales/es.js"></script>
 </head>
 <body>
     <div class="container" id="container-principal">
@@ -27,7 +29,7 @@ include_once('controllers/pacientes/listado_de_pacientes.php');
 </body>
 <style>
     #container-principal{
-        margin-left: 10%;
+        margin-left: 15%;
     }
     #calendar-container {
     
@@ -48,15 +50,35 @@ include_once('controllers/pacientes/listado_de_pacientes.php');
   let eventos;
   var realizada = 0;
   let calendar;
-  let title_anterior_registro;
-   
-
+  let title_anterior_registro; 
+  FullCalendar.globalLocales.push(function () {
+    'use strict';
+     var es = {
+         code: "es",
+         week: {
+             dow: 1,
+             doy: 4
+         },
+         buttonText: {
+             prev: "Ant",
+             next: "Sig",
+             today: "Hoy",
+             month: "Mes",
+             week: "Semana",
+             day: "Día",
+             list: "Agenda"
+         },
+         weekText: "Sm",
+         allDayText: "Todo el día",
+         moreLinkText: "más",
+         noEventsText: "No hay eventos para mostrar"
+     };
+     return es;
+ }());
 document.addEventListener('DOMContentLoaded', function() {
-  
     var calendarEl = document.getElementById('calendar');
      calendar = new FullCalendar.Calendar(calendarEl, {
         initialView: 'dayGridMonth',
-        locale: 'es',
         editable: true,
         selectable: true,
         allDaySlot: false,
@@ -64,10 +86,13 @@ document.addEventListener('DOMContentLoaded', function() {
         contentHeight: 'auto',        // Opcional: Ajusta la altura del contenido
         expandRows: true,             // Expande filas para que todo el mes sea visible sin scroll
         headerToolbar: {
-        left: '',            // No hay elementos a la izquierda
-        center: '',          // No hay elementos en el centro
-        right: 'title'       // Coloca el título a la derecha
-    },
+            left: 'prev,next today',  // Agrega botones de navegación en la izquierda
+            center: 'title',          // Coloca el título en el centro
+            right: 'dayGridMonth'
+            
+        },
+        locale: 'es',
+        lang: 'es',
         events: 'controllers/reservas/cargar_reserva.php',
         dateClick: function(info) {
             var fechaSeleccionada = info.dateStr;
@@ -208,7 +233,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
     calendar.render();
-     
+    calendar.setOption('locale', 'es');
   
 });
 function actualizarColorEvento(hora, nombre, apellido, fecha, color) {

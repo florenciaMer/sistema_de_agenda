@@ -13,11 +13,10 @@ $estado = 1;
 
  
 $sentencia = $pdo->prepare("SELECT * FROM tb_pacientes WHERE 
-email =:email OR nombre =:nombre AND apellido =:apellido");
+nombre =:nombre AND apellido =:apellido");
 
 $sentencia->bindParam('nombre', $nombre);
 $sentencia->bindParam('apellido', $apellido);
-$sentencia->bindParam('email', $email);
 
  $sentencia->execute();
  $cuenta = $sentencia->rowCount();
